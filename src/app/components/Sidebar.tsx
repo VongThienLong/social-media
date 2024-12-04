@@ -3,6 +3,7 @@
   import placeholder from '../assets/images/profile_placeholder.png';
   import Image from 'next/image';
   import Link from 'next/link';
+  import { ReactNode } from 'react';
   import {
     HomeIcon,
     UserGroupIcon,
@@ -15,7 +16,12 @@
     Cog8ToothIcon
   } from '@heroicons/react/24/outline';
 
-  function SidebarComponent({ children }) {
+
+  interface SidebarComponentProps {
+    children: ReactNode;
+  }
+
+  function SidebarComponent({ children }: SidebarComponentProps) {
 
     const renderSidebarContent = () => {
       return (
@@ -77,7 +83,7 @@
         </div>
 
         {/* Top Navigation - Visible on Mobile Only */}
-        <header className="fixed top-0 z-50 flex items-center bg-white justify-between px-2 w-full shadow-sm min-h-[4rem] md:hidden px-4">
+        <header className="fixed top-0 z-50 flex items-center bg-white justify-between w-full shadow-sm min-h-[4rem] md:hidden px-4">
           <div className="flex items-center">
             <span className="text-lg font-semibold">Logo</span>
           </div>
