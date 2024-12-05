@@ -1,20 +1,35 @@
 "use client";
-import React, { useState } from "react";
+import React, {useEffect, useState } from "react";
+
+
 interface Contact {
+  _id: string;
   name: string;
   fullname: string;
   time: string;
   active: boolean;
-  message: string;
+  last_message: string;
+  userId: string;
+  displayName: string;
+  avatar: string;
+  messages?: Message[];
 }
 
+interface Message {
+  senderId: string;
+  content: string;
+  timestamp: string;
+}
 
-const Sidebar = ({ contacts,
+const Sidebar = ({
+  contacts,
   onSelectContact,
 }: {
   contacts: Contact[];
-  onSelectContact: React.Dispatch<React.SetStateAction<Contact | null>>; }
-) => {
+  onSelectContact: React.Dispatch<React.SetStateAction<Contact | null>>;
+}) => {
+  const validContacts = Array.isArray(contacts) ? contacts : [];
+
   return (
     <div className="w-1/5 bg-gray-100 h-full flex flex-col">
       {/* Header */}
@@ -35,13 +50,17 @@ const Sidebar = ({ contacts,
       <div className="px-4 py-2 ">
         {/* Avatars Row */}
         <div className="flex items-center gap-4 justify-start mb-2">
-          {contacts.slice(0, 5).map((contact, index) => (
+          {validContacts.slice(0, 5).map((contact, index) => (
             <div key={index} className="relative">
               {/* Avatar */}
-              <div className="w-14 h-14 bg-gray-300 rounded-full"></div>
+              <div className="w-14 h-14 bg-gray-300 rounded-full"
+              style={{
+                backgroundImage: `url(${contact.avatar})`,
+                backgroundSize: "cover",
+              }}></div>
               {/* Active Dot */}
               {contact.active && (
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border border-white"></div>
+                <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border border-white"></div>
               )}
             </div>
           ))}
@@ -49,18 +68,14 @@ const Sidebar = ({ contacts,
 
         {/* Tabs */}
         <div className="flex justify-between text-center pt-2">
-          <span className=" text-sm font-bold  ">
-            Tin nhắn
-          </span>
-          <span className="flex-2 text-sm text-gray-500 pb-1">
-            Tin nhắn đang chờ
-          </span>
+          <span className=" text-sm font-bold">Tin nhắn</span>
+          <span className="flex-2 text-sm text-gray-500 pb-1">Tin nhắn đang chờ</span>
+        </div>
       </div>
-    </div>
 
       {/* Contact List */}
       <div className="flex-1 overflow-y-auto">
-        {contacts.map((contact, index) => (
+        {validContacts.map((contact, index) => (
           <div
             key={index}
             onClick={() => onSelectContact(contact)} // Cập nhật state khi người dùng click
@@ -69,15 +84,21 @@ const Sidebar = ({ contacts,
             <div className="flex items-center gap-4">
               {/* Avatar */}
               <div className="relative">
-                <div className="w-12 h-12 bg-gray-300 rounded-full"></div>
+                <div
+                  className="w-12 h-12 bg-gray-300 rounded-full"
+                  style={{
+                    backgroundImage: `url(${contact.avatar})`,
+                    backgroundSize: "cover",
+                  }}
+                ></div>
                 {contact.active && (
                   <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border border-white"></div>
                 )}
               </div>
               {/* Name and Message */}
               <div>
-                <p className="font-medium">{contact.name}</p>
-                <p className="text-sm text-gray-500">{contact.message}</p>
+                <p className="font-medium">{contact.displayName}</p>
+                <p className="text-sm text-gray-500">{contact.last_message}</p>
               </div>
             </div>
             {/* Time */}
@@ -89,7 +110,8 @@ const Sidebar = ({ contacts,
   );
 };
 
-const ChatBox = ({ selectedContact }: { selectedContact: Contact | null }) => {
+
+const ChatBox = ( { selectedContact, }: { selectedContact: Contact | null }) => {
   if (!selectedContact) return <div className="w-4/5 flex text-center items-center justify-center">
     <div className="flex items-center justify-center  ">
       <div className="text-center">
@@ -113,10 +135,13 @@ const ChatBox = ({ selectedContact }: { selectedContact: Contact | null }) => {
       {/* Chat Header */}
       <div className="p-4 border-b flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 bg-gray-300 rounded-full">
+          <div className="w-10 h-10 bg-gray-300 rounded-full" style={{
+                backgroundImage: `url(${selectedContact.avatar})`,
+                backgroundSize: "cover",
+              }}>
           </div>
           <div>
-            <h2 className="font-bold">{selectedContact.name}</h2>
+            <h2 className="font-bold">{selectedContact.displayName}</h2>
             <p className="text-sm text-gray-500">Đang hoạt động</p>
           </div>
         </div>
@@ -130,12 +155,15 @@ const ChatBox = ({ selectedContact }: { selectedContact: Contact | null }) => {
 
       <div className="flex flex-col items-center justify-center h-screen bg-gray-50 ">
         {/* Ảnh đại diện */}
-        <div className="w-24 h-24 bg-gray-300 rounded-full"></div>
+        <div className="w-24 h-24 bg-gray-300 rounded-full" style={{
+                backgroundImage: `url(${selectedContact.avatar})`,
+                backgroundSize: "cover",
+              }}></div>
         
         {/* Tên và Username */}
         <div className="mt-4 text-center">
           <h2 className="text-xl font-semibold">{selectedContact.fullname}</h2>
-          <p className="text-gray-500">{selectedContact.name}</p>
+          <p className="text-gray-500">{selectedContact.displayName}</p>
         </div>
         
         {/* Nút Xem trang cá nhân */}
@@ -145,17 +173,29 @@ const ChatBox = ({ selectedContact }: { selectedContact: Contact | null }) => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 p-4 bg-gray-50">
-        <div className="mb-4">
-          <div className="bg-gray-200 p-3 rounded-lg inline-block">Xin chào</div>
-        </div>
-        <div className="text-right">
-          <div className="bg-blue-500 text-white p-3 rounded-lg inline-block">
-            Hi, bro
+      <div className="flex-1 p-4 bg-gray-50  " >
+        {selectedContact ? (
+          <div>
+            {selectedContact.messages?.map((message, index) => (
+              <div key={index} className={`mb-4 ${message.senderId === selectedContact.userId ? 'text-left' : 'text-right'}`}>
+                <div
+                  className={`${
+                    message.senderId === selectedContact.userId
+                      ? 'bg-gray-200'
+                      : 'bg-blue-500 text-white'
+                  } p-2 rounded-3xl inline-block `}
+                >
+                  {message.content}
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
+        ) : (
+          <div className="text-center">
+            <p className="text-sm text-gray-500">Chọn một cuộc trò chuyện!</p>
+          </div>
+        )}
       </div>
-
       {/* Input */}
       <div>
         <div className="mt-4 border-b mb-4 mr-4 border-t-rgb(var(--ig-elevated-separator)) border-b-rgb(var(--ig-elevated-separator)) border-t border-l border-r border-l-rgb(var(--ig-elevated-separator)) flex-col flex rounded-bl-3xl rounded-tr-3xl items-stretch rounded-tl-3xl rounded-br-3xl border-r-rgb(var(--ig-elevated-separator)) ml-4 ">
@@ -206,17 +246,23 @@ const ChatBox = ({ selectedContact }: { selectedContact: Contact | null }) => {
 
 
 export default function MessagePage() {
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
-  const contacts = [
-    { name: "longvong", fullname: "Vòng Thiên Long", time: "18:00", active: true, message: "Hi, bro" },
-    { name: "TuanKiet", fullname: "Hồ Phạm Tuấn kiệt", time: "15:35", active: true, message: "Hi, bro" },
-    { name: "DucHung", fullname: "Lim Đức Hưng", time: "13:00", active: true, message: "Hi, bro" },
-    { name: "XuanHoang", fullname: "Lâm Xuân Hoàng", time: "12:30", active: true, message: "Hi, bro" },
-    { name: "BaoKim", fullname: "Nguyễn Bảo Kim", time: "11:00", active: true, message: "Hi, bro" },
-    { name: "HoangHuy", fullname: "Hồ Hoàng Huy", time: "10:00", active: true, message: "Hi, bro" },
-    { name: "Thinh", fullname: "Huỳnh Quốc Thịnh", time: "08:00", active: true, message: "Hi, bro" },
-  ];
+useEffect(() => {
+  const fetchContacts = async () => {
+    try {
+      const response = await fetch('/api/fetchMessages'); 
+      const data: Contact[] = await response.json();
+      setContacts(data);
+    } catch (error) {
+      console.error('Error fetching contacts:', error);
+    }
+  };
+
+  fetchContacts();
+}, []);
+
 
   return (
     <div className="flex h-screen">
