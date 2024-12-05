@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { ShareIcon, HeartIcon, ChatBubbleOvalLeftIcon } from '@heroicons/react/24/outline';
 
 export interface Comment {
@@ -12,35 +13,38 @@ export interface PostProps {
   content: string;
   url?: string;
   createdDate: string;
-  location?: string;
   tags?: string[];
   likes: string[];
   visibility: string;
   comments: Comment[];
-  displayName: string;
   avatar: string;
+  displayName: string;
 }
 
 const Post: React.FC<PostProps> = ({
   content,
   url,
   createdDate,
-  location,
   tags = [],
   likes,
   comments,
-  displayName,
-  avatar,
+  avatar, 
+  displayName
 }) => {
   return (
-    <div className="px-6 py-4 border-t border-gray-300">
+    <div className="p-3 md:px-6 md:py-4 border-t border-gray-300">
       {/* User Info */}
       <div className="flex items-center space-x-2 mb-4 justify-between">
         <div className="flex items-center space-x-3 cursor-pointer">
-          <div
-            className="w-10 h-10 rounded-full"
-            style={{ backgroundImage: `url(${avatar})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-          />
+        <div className="flex w-10 h-10 rounded-full overflow-hidden">
+          <Image
+              src={avatar}
+              alt="User Avatar"
+              width={40} 
+              height={40} 
+              className="object-cover"
+            />
+          </div>
           <div>
             <p className="text-sm font-semibold">{displayName}</p>
             <p className="text-xs text-gray-500">{new Date(createdDate).toLocaleString()}</p>
@@ -53,10 +57,16 @@ const Post: React.FC<PostProps> = ({
 
       {/* Post Image */}
       {url && (
-        <div
-          className="bg-gray-200 rounded-md h-72 mb-3"
-          style={{ backgroundImage: `url(${url})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-        />
+        <div className='w-full mb-3'>
+          <Image
+            src={url}
+            alt="Post Image"
+            width={200}
+            height={200}
+            objectFit="cover"
+            className="object-cover w-full rounded-lg"
+          />
+        </div>
       )}
 
       {/* Tags */}

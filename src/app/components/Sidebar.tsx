@@ -22,59 +22,52 @@
   }
 
   function SidebarComponent({ children }: SidebarComponentProps) {
-
-    const renderSidebarContent = () => {
-      return (
-        <nav className='flex flex-col justify-around h-full'>
-          <div className='flex flex-col items-center space-y-4 p-4'>
-            <Link href="/" className="p-2 rounded-lg hover:bg-gray-200">
-              <HomeIcon className="h-6 w-6 text-gray-700" />
-            </Link>
-            <Link href="#" className="p-2 rounded-lg hover:bg-gray-200">
-              <UsersIcon className="h-6 w-6 text-gray-700" />
-            </Link>
-            <Link href="#" className="p-2 rounded-lg hover:bg-gray-200">
-              <MagnifyingGlassIcon className="h-6 w-6 text-gray-700" />
-            </Link>
-            <Link href="/message" className="p-2 rounded-lg hover:bg-gray-200">
-              <ChatBubbleOvalLeftIcon className="h-6 w-6 text-gray-700" />
-            </Link>
-            <Link href="#" className="p-2 rounded-lg hover:bg-gray-200">
-              <UserGroupIcon className="h-6 w-6 text-gray-700" />
-            </Link>
-            <Link href="#" className="p-2 rounded-lg hover:bg-gray-200">
-              <BookmarkIcon className="h-6 w-6 text-gray-700" />
-            </Link>
-            <Link href="#" className="p-2 rounded-lg hover:bg-gray-200">
-              <BellIcon className="h-6 w-6 text-gray-700" />
-            </Link>
-          </div>
-
-          <div className='flex flex-col items-center space-y-3 p-4 mb-4'>
-            <Link href="/profile" className="p-2 rounded-lg">
-              <Image src={placeholder} alt="Profile" className="h-8 w-8 rounded-full" />
-            </Link>
-            <Link href="#" className="p-2 rounded-lg hover:bg-gray-200">
-              <Cog8ToothIcon className="h-6 w-6 text-gray-700" />
-            </Link>
-          </div>
-        </nav>
-      );
-    };
-
     return (
       <div className="flex w-full h-full">
         {/* Sidebar - Hidden on Mobile */}
-        <div
-          className={`flex-col fixed top-0 left-0 h-full bg-gray-100 shadow-md md:block items-center justify-between transition-width duration-300 hidden`}
-        >
-          {/* Sidebar Logo */}
-          <div className="flex items-center justify-center w-12 h-12 rounded-lg mx-auto my-2 bg-blue-500">
-            <div className="text-white font-bold text-xl">SM</div>
-          </div>
+        <div className='fixed top-0 left-0 h-full bg-gray-100 shadow-md md:block items-center transition-width duration-300 hidden'>
+          <div className='flex flex-col h-full justify-between'>
+            {/* Sidebar Logo */}
+            <div className="flex items-center justify-center w-12 h-12 rounded-lg mx-auto my-2 bg-blue-500">
+              <div className="text-white font-bold text-xl">SM</div>
+            </div>
 
-          {/* Sidebar Content */}
-          {renderSidebarContent()}
+            {/* Sidebar Content */}
+            <nav className='flex flex-col'>
+              <div className='flex flex-col items-center space-y-4 p-4'>
+                <Link href="/" className="p-2 rounded-lg hover:bg-gray-200">
+                  <HomeIcon className="h-6 w-6 text-gray-700" />
+                </Link>
+                <Link href="#" className="p-2 rounded-lg hover:bg-gray-200">
+                  <UsersIcon className="h-6 w-6 text-gray-700" />
+                </Link>
+                <Link href="#" className="p-2 rounded-lg hover:bg-gray-200">
+                  <MagnifyingGlassIcon className="h-6 w-6 text-gray-700" />
+                </Link>
+                <Link href="/message" className="p-2 rounded-lg hover:bg-gray-200">
+                  <ChatBubbleOvalLeftIcon className="h-6 w-6 text-gray-700" />
+                </Link>
+                <Link href="#" className="p-2 rounded-lg hover:bg-gray-200">
+                  <UserGroupIcon className="h-6 w-6 text-gray-700" />
+                </Link>
+                <Link href="#" className="p-2 rounded-lg hover:bg-gray-200">
+                  <BookmarkIcon className="h-6 w-6 text-gray-700" />
+                </Link>
+                <Link href="#" className="p-2 rounded-lg hover:bg-gray-200">
+                  <BellIcon className="h-6 w-6 text-gray-700" />
+                </Link>
+              </div>
+            </nav>
+
+            <div className='flex flex-col items-center space-y-3 p-4 mb-4'>
+                <Link href="/profile" className="p-2 rounded-lg">
+                  <Image src={placeholder} alt="Profile" className="h-8 w-8 rounded-full" />
+                </Link>
+                <Link href="#" className="p-2 rounded-lg hover:bg-gray-200">
+                  <Cog8ToothIcon className="h-6 w-6 text-gray-700" />
+                </Link>
+            </div>
+          </div>
         </div>
 
         {/* Main Content */}
@@ -102,7 +95,7 @@
         </header>
 
         {/* Bottom Navigation - Visible on Mobile Only */}
-        <nav className="fixed bottom-0 left-0 w-full flex justify-around items-center p-3 z-50 md:hidden">
+        <nav className="fixed bottom-0 left-0 w-full flex justify-around items-center bg-white p-3 z-50 md:hidden">
           <Link href="/" className='text-gray-700 hover:text-black'>
             <HomeIcon className="h-7 w-7" />
           </Link>
