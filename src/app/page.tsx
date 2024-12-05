@@ -14,39 +14,37 @@ export default function HomePage() {
   const [postContent, setPostContent] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // Fetch posts data
+  // Fetch posts and current user data
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await fetch('/api/fetchPosts');
-        const data = await response.json();
-    
-        const sortedPosts = data.sort((a: PostProps, b: PostProps) => {
-          return new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime();
-        });
-    
-        console.log('Sorted Posts:', sortedPosts);
-        setPosts(sortedPosts);
-      } catch (error) {
-        console.error('Error fetching posts:', error);
-      }
-    };
+    fetchUserData();
     fetchPosts();    
   }, []);
 
-  // Fetch current user data
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await fetch('/api/fetchUserId?id=647e915f3dbfbb6c487d9abc');
-        const currentUser = await response.json();
-        setCurrentUser(currentUser);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
-    fetchUserData();
-  }, []);
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch('/api/fetchPosts');
+      const data = await response.json();
+  
+      const sortedPosts = data.sort((a: PostProps, b: PostProps) => {
+        return new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime();
+      });
+  
+      console.log('Sorted Posts:', sortedPosts);
+      setPosts(sortedPosts);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  };
+
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch('/api/fetchUserId?id=647e915f3dbfbb6c487d9abc');
+      const currentUser = await response.json();
+      setCurrentUser(currentUser);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
 
   // Handle file change (Image upload)
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,8 +102,7 @@ export default function HomePage() {
 
       const result = await response.json();
       if (result.success) {
-        // Fetch posts again after successfully creating a new post
-        await fetchPosts(); // Ensure the new post is added to the list
+        await fetchPosts();
 
         // Reset modal and form state
         setShowPostModal(false);
@@ -120,18 +117,6 @@ export default function HomePage() {
       setIsSubmitting(false);
     }
   };
-
-// Function to fetch posts from the server
-const fetchPosts = async () => {
-  try {
-    const response = await fetch('/api/fetchPosts');
-    const data = await response.json();
-    console.log('Posts:', data);
-    setPosts(data);
-  } catch (error) {
-    console.error('Error fetching posts:', error);
-  }
-};
 
   // Close modal when clicking outside
   useEffect(() => {
@@ -182,9 +167,9 @@ const fetchPosts = async () => {
           <button
             className="ml-4 bg-blue-700 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
             onClick={handlePostSubmit}
-            disabled={isSubmitting} // Disable button while submitting
+            disabled={isSubmitting}
           >
-            {isSubmitting ? 'Đang đăng...' : 'Đăng'} {/* Button text changes based on submission state */}
+            {isSubmitting ? 'Đang đăng...' : 'Đăng'}
           </button>
         </div>
 
@@ -228,7 +213,7 @@ const fetchPosts = async () => {
                 onClick={handlePostSubmit}
                 disabled={isSubmitting} // Disable button while submitting
               >
-                {isSubmitting ? 'Đang đăng...' : 'Đăng'} {/* Button text changes based on submission state */}
+                {isSubmitting ? 'Đăng' : 'Đăng'} {/* Button text changes based on submission state */}
               </button>
             </div>
           </div>
