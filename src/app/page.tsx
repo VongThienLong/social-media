@@ -111,7 +111,7 @@ export default function HomePage() {
       const result = await response.json();
       if (result.success) {
         await fetchPosts();
-        toast.success('Post added successfully!');
+        toast.success('Đăng bài thành công!');
 
         // Reset modal and form state
         setShowPostModal(false);
@@ -120,7 +120,7 @@ export default function HomePage() {
         setPostContent('');
       }
     } catch (error) {
-      toast.error('Failed to add post.');
+      toast.error('Đã xảy ra lỗi khi đăng bài.');
     } finally {
       setIsSubmitting(false);
     }
@@ -174,10 +174,10 @@ export default function HomePage() {
           </div>
           <button
             className="ml-4 bg-blue-700 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
-            onClick={handlePostSubmit}
+            onClick={() => setShowPostModal(true)}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Đang đăng...' : 'Đăng'}
+            {isSubmitting ? 'Đăng' : 'Đăng'}
           </button>
         </div>
 
@@ -229,7 +229,10 @@ export default function HomePage() {
       )}
 
       {/* Floating Action Button */}
-      <button className="fixed bottom-4 right-4 bg-blue-500 text-white p-3 rounded-full shadow-md hover:bg-blue-600 transition hidden md:block">
+      <button 
+        className="fixed bottom-4 right-4 bg-blue-500 text-white p-3 rounded-full shadow-md hover:bg-blue-600 transition hidden md:block"
+        onClick={() => setShowPostModal(true)}
+      >
         <PlusIcon className="h-5 w-5" />
       </button>
     </div>

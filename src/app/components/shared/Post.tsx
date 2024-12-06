@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { ShareIcon, HeartIcon, ChatBubbleOvalLeftIcon } from "@heroicons/react/24/outline";
 import { EllipsisHorizontalIcon } from "@heroicons/react/16/solid";
-import { toast } from "react-toastify";
+import { Id, toast } from "react-toastify";
 
 export interface Comment {
   userId: string;
@@ -53,6 +53,53 @@ const Post: React.FC<PostProps> = ({
   };
 
   const handleDelete = async () => {
+    setShowMenu(false);
+    const confirmDeleteToast = (toastId: Id) => {
+      const timeoutId = setTimeout(() => {
+        toast.dismiss(toastId);
+      }, 5000);
+  
+      toast.update(toastId, {
+        render: (
+          <div className="text-start p-2">
+            <p className="text-gray-800 font-medium">Bạn có muốn xóa bài viết này?</p>
+            <div className="mt-4 flex justify-start space-x-2">
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+                onClick={async () => {
+                  clearTimeout(timeoutId);
+                  await confirmDelete();
+                  toast.dismiss(toastId);
+                }}
+              >
+                Xác nhận
+              </button>
+              <button
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition"
+                onClick={() => {
+                  clearTimeout(timeoutId);
+                  toast.dismiss(toastId);
+                }}
+              >
+                Hủy
+              </button>
+            </div>
+          </div>
+        ),
+        autoClose: false,
+        closeOnClick: false,
+      });
+    };
+
+    const toastId = toast('Processing deletion...', {
+      autoClose: false,
+      closeOnClick: false,
+    });
+  
+    confirmDeleteToast(toastId);
+  };
+  
+  const confirmDelete = async () => {
     try {
       const response = await fetch(`/api/deletePost`, {
         method: 'DELETE',
@@ -65,13 +112,13 @@ const Post: React.FC<PostProps> = ({
       const data = await response.json();
   
       if (data.success) {
-        toast.success('Post deleted successfully!');
+        toast.success('Xóa bài viết thành công!');
         onDelete(_id);
       } else {
-        toast.error('Failed to delete post.');
+        toast.error('Xóa bài viết thất bại.');
       }
     } catch (error) {
-      toast.error('An error occurred while deleting the post.');
+      toast.error('Đã xảy ra lỗi khi xóa bài viết.');
     }
   };
 
@@ -91,13 +138,13 @@ const Post: React.FC<PostProps> = ({
       const data = await response.json();
   
       if (data.success) {
-        toast.success('Post updated successfully!');
+        toast.success('Cập nhật bài viết thành công!');
         onPostUpdated();
       } else {
-        toast.error('Failed to update post.');
+        toast.error('Cập nhật bài viết thất bại.');
       }
     } catch (error) {
-      toast.error('An error occurred while updating the post.');
+      toast.error('Đã xảy ra lỗi khi cập nhật bài viết.');
     } finally {
       setShowEditModal(false);
     }
@@ -144,7 +191,7 @@ const Post: React.FC<PostProps> = ({
           />
           {/* Dropdown Menu */}
           {showMenu && (
-            <div className="absolute right-0 mt-2 bg-white border border-gray-300 rounded shadow-lg w-28">
+            <div className="absolute right-0 bg-white border border-gray-300 rounded shadow-lg w-28">
               <button
                 onClick={handleEdit}
                 className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
@@ -203,7 +250,7 @@ const Post: React.FC<PostProps> = ({
 
       {/* Edit Post Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 p-3 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-lg w-full">
             <h3 className="text-xl font-semibold mb-4">Edit Post</h3>
             <textarea
@@ -215,7 +262,7 @@ const Post: React.FC<PostProps> = ({
             <div className="flex justify-end gap-4">
               <button
                 onClick={() => setShowEditModal(false)}
-                className="bg-gray-300 text-white px-4 py-2 rounded"
+                className="bg-red-500 text-white px-4 py-2 rounded"
               >
                 Cancel
               </button>

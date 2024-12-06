@@ -28,8 +28,8 @@
         <div className='fixed top-0 left-0 h-full bg-gray-100 shadow-md md:block items-center transition-width duration-300 hidden'>
           <div className='flex flex-col h-full justify-between'>
             {/* Sidebar Logo */}
-            <div className="flex items-center justify-center w-12 h-12 rounded-lg mx-auto my-2 bg-blue-500">
-              <div className="text-white font-bold text-xl">SM</div>
+            <div className="flex items-center justify-center p-2 rounded-lg mx-auto mt-4 bg-blue-500">
+              <div className="text-white font-bold text-xl text-center">SM</div>
             </div>
 
             {/* Sidebar Content */}
