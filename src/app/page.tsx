@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { ChevronDownIcon, PlusIcon } from '@heroicons/react/24/outline';
 import PostComponent, { PostProps } from './components/shared/Post';
 import Image from 'next/image';
+import { toast } from 'react-toastify';
 
 export default function HomePage() {
   const [posts, setPosts] = useState<PostProps[]>([]);
@@ -14,7 +15,6 @@ export default function HomePage() {
   const [postContent, setPostContent] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // Fetch posts and current user data
   useEffect(() => {
     fetchUserData();
     fetchPosts();    
@@ -34,6 +34,14 @@ export default function HomePage() {
     } catch (error) {
       console.error('Error fetching posts:', error);
     }
+  };
+
+  const handlePostUpdated = () => {
+    fetchPosts();
+  };
+
+  const handleDeletePost = (postId: string) => {
+    setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
   };
 
   const fetchUserData = async () => {
@@ -103,6 +111,7 @@ export default function HomePage() {
       const result = await response.json();
       if (result.success) {
         await fetchPosts();
+        toast.success('Post added successfully!');
 
         // Reset modal and form state
         setShowPostModal(false);
@@ -111,8 +120,7 @@ export default function HomePage() {
         setPostContent('');
       }
     } catch (error) {
-      console.error('Error submitting post:', error);
-      alert('Failed to submit post.');
+      toast.error('Failed to add post.');
     } finally {
       setIsSubmitting(false);
     }
@@ -177,7 +185,7 @@ export default function HomePage() {
         <div className='mb-10 md:mb-0'>
           {posts.length > 0 ? (
             posts.map((post: PostProps) => (
-              <PostComponent key={post._id} {...post} />
+              <PostComponent key={post._id} {...post} onPostUpdated={handlePostUpdated} onDelete={handleDeletePost}/>
             ))
           ) : (
             <p className="text-gray-500 text-center m-4">Không có bài đăng nào để hiển thị.</p>

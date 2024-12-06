@@ -1,4 +1,3 @@
-// src/app/api/fetchPosts/route.ts
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '../../../libs/mongodb';
 
