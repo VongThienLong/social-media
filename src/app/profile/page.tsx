@@ -1,19 +1,34 @@
 "use client";
 import { useEffect, useState } from "react";
 
+// Định nghĩa kiểu dữ liệu cho `user` và `formData`
+interface User {
+  fullname: string;
+  displayName: string;
+  followers: number;
+  following: number;
+}
+
+interface FormData {
+  fullname: string;
+  displayName: string;
+}
+
 export default function ProfilePage() {
-  const [user, setUser] = useState<any>({
+  const [user, setUser] = useState<User>({
     fullname: "Nguyễn Kim",
     displayName: "nbk473",
     followers: 0,
     following: 1,
   });
-  const [posts, setPosts] = useState<any[]>([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<any>({
+
+  const [formData, setFormData] = useState<FormData>({
     fullname: "",
     displayName: "",
   });
+
+  const [posts, setPosts] = useState<any[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
 
   // Fetch posts
   useEffect(() => {
