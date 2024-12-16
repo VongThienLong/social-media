@@ -1,13 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { ShareIcon, HeartIcon, ChatBubbleOvalLeftIcon } from "@heroicons/react/24/outline";
+import { ShareIcon, HeartIcon, ChatBubbleOvalLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { EllipsisHorizontalIcon } from "@heroicons/react/16/solid";
 import { Id, toast } from "react-toastify";
 
 export interface Comment {
+  _id: string;
   userId: string;
-  comment: string;
+  content: string;
   createdAt: string;
+  author: {
+    avatar: string;
+    displayName: string;
+  };
 }
 
 export interface PostProps {
@@ -19,10 +24,12 @@ export interface PostProps {
   likes: string[];
   visibility: string;
   comments: Comment[];
+  userId: string;
   avatar: string;
   displayName: string;
   onPostUpdated: () => void; 
   onDelete: (postId: string) => void;
+  currentUser: { _id: string; displayName: string; avatar: string };
 }
 
 const Post: React.FC<PostProps> = ({
@@ -33,27 +40,35 @@ const Post: React.FC<PostProps> = ({
   tags = [],
   likes,
   comments,
+  userId,
   avatar,
   displayName,
   onPostUpdated,
   onDelete,
+  currentUser,
 }) => {
-  const [showMenu, setShowMenu] = useState(false);
+  const [showPostMenu, setShowPostMenu] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [updatedContent, setUpdatedContent] = useState(content);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [likesCount, setLikesCount] = useState(likes.length);
+  const [hasLiked, setHasLiked] = useState(
+    currentUser && likes.includes(currentUser._id)
+  );
+  const [newComment, setNewComment] = useState("");
+  const [commentsList, setCommentsList] = useState<Comment[]>(comments);
 
   const handleMoreButton = () => {
-    setShowMenu((prev) => !prev);
+    setShowPostMenu((prev) => !prev);
   };
 
   const handleEdit = () => {
-    setShowMenu(false);
+    setShowPostMenu(false);
     setShowEditModal(true);
   };
 
   const handleDelete = async () => {
-    setShowMenu(false);
+    setShowPostMenu(false);
     const confirmDeleteToast = (toastId: Id) => {
       const timeoutId = setTimeout(() => {
         toast.dismiss(toastId);
@@ -150,10 +165,91 @@ const Post: React.FC<PostProps> = ({
     }
   };
 
+  const handleLike = async () => {
+    try {
+      const newLikeStatus = !hasLiked;
+      setHasLiked(newLikeStatus);
+      setLikesCount((prev) => (newLikeStatus ? prev + 1 : prev - 1));
+  
+      const response = await fetch(`/api/likePost`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ _id, userId: currentUser._id, like: newLikeStatus }),
+      });
+  
+      const data = await response.json();
+  
+      if (!data.success) {
+        setHasLiked(!newLikeStatus);
+        setLikesCount((prev) => (newLikeStatus ? prev - 1 : prev + 1));
+      }
+    } catch (error) {
+      setHasLiked(!hasLiked);
+      setLikesCount((prev) => (hasLiked ? prev - 1 : prev + 1));
+    }
+  };
+
+  const handleAddComment = async () => {
+    console.log(userId);
+    console.log(currentUser);
+    if (!newComment.trim()) return;
+
+    try {
+      const response = await fetch("/api/addComment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          postId: _id,
+          userId: currentUser._id,
+          content: newComment,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setCommentsList((prev) => [...prev, data.comment]);
+        setNewComment("");
+        onPostUpdated();
+      } else {
+        console.error(data.message);
+      }
+    } catch (error) {
+      console.error("Failed to add comment:", error);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      const response = await fetch("/api/deleteComment", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ commentId }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setCommentsList((prev) =>
+          prev.filter((comment) => comment._id !== commentId)
+        );
+        onPostUpdated();
+      } else {
+        console.error(data.message);
+      }
+    } catch (error) {
+      console.error("Failed to delete comment:", error);
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowMenu(false);
+        setShowPostMenu(false);
       }
     };
 
@@ -166,8 +262,8 @@ const Post: React.FC<PostProps> = ({
   return (
     <div className="p-3 md:px-6 md:py-4 border-t border-gray-300 relative">
       {/* User Info */}
-      <div className="flex items-center space-x-2 mb-4 justify-between">
-        <div className="flex items-center space-x-3 cursor-pointer">
+      <div className="flex items-center gap-2 mb-4 justify-between">
+        <div className="flex items-center gap-3 cursor-pointer">
           <div className="flex w-10 h-10 rounded-full overflow-hidden">
             <Image
               src={avatar}
@@ -184,29 +280,32 @@ const Post: React.FC<PostProps> = ({
             </p>
           </div>
         </div>
-        <div className="relative" ref={menuRef}>
-          <EllipsisHorizontalIcon
-            onClick={handleMoreButton}
-            className="h-5 w-5 text-gray-700 cursor-pointer"
-          />
-          {/* Dropdown Menu */}
-          {showMenu && (
-            <div className="absolute right-0 bg-white border border-gray-300 rounded shadow-lg w-28">
-              <button
-                onClick={handleEdit}
-                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-              >
-                Sửa
-              </button>
-              <button
-                onClick={handleDelete}
-                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-              >
-                Xóa
-              </button>
-            </div>
-          )}
-        </div>
+
+        {currentUser._id === userId && (
+          <div className="relative" ref={menuRef}>
+            <EllipsisHorizontalIcon
+              onClick={handleMoreButton}
+              className="h-5 w-5 text-gray-700 cursor-pointer"
+            />
+            {/* Dropdown Menu */}
+            {showPostMenu && (
+              <div className="absolute right-0 bg-white border border-gray-300 rounded shadow-lg w-28">
+                <button
+                  onClick={handleEdit}
+                  className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                >
+                  Sửa
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                >
+                  Xóa
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Post Content */}
@@ -235,9 +334,12 @@ const Post: React.FC<PostProps> = ({
 
       {/* Interaction Buttons */}
       <div className="flex items-center gap-4 text-gray-500 text-sm mt-2">
-        <button className="flex items-center space-x-1">
+        <button
+          onClick={handleLike}
+          className={`flex items-center space-x-1 ${hasLiked ? 'text-red-500' : 'text-gray-500'}`}
+        >
           <HeartIcon className="h-6 w-6" />
-          <span>{likes.length}</span>
+          <span>{likesCount}</span>
         </button>
         <button className="flex items-center space-x-1">
           <ChatBubbleOvalLeftIcon className="h-6 w-6" />
@@ -248,11 +350,49 @@ const Post: React.FC<PostProps> = ({
         </button>
       </div>
 
+      {/* Comments Section */}
+      <div className="mt-4">
+        <div className="space-y-2">
+          {comments.map((comment) => (
+            <div key={comment._id} className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <p className="text-sm font-bold">{comment.author.displayName}:</p>
+                <p className="text-sm text-gray-700">{comment.content}</p>
+              </div>
+              {currentUser._id === comment.userId && (
+                  <XMarkIcon
+                    onClick={() => handleDeleteComment(comment._id)}
+                    className="text-gray-300 hover:text-gray-700 transition w-4 h-4 cursor-pointer"
+                  />
+                )}
+            </div>
+          ))}
+        </div>
+
+        {/* Add Comment */}
+        <div className="mt-3 flex items-center justify-center gap-4">
+          <input
+            placeholder="Nhập bình luận..."
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            className="w-full px-3 py-1.5 border rounded-full text-sm flex-grow"
+          />
+          {newComment.trim() && (
+            <button
+              onClick={handleAddComment}
+              className="text-blue-500 hover:text-blue-700 transition"
+            >
+              Đăng
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Edit Post Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-50 p-3 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-lg w-full">
-            <h3 className="text-xl font-semibold mb-4">Edit Post</h3>
+            <h3 className="text-xl font-semibold mb-4">Sửa bài viết</h3>
             <textarea
               value={updatedContent}
               onChange={(e) => setUpdatedContent(e.target.value)}
@@ -264,19 +404,20 @@ const Post: React.FC<PostProps> = ({
                 onClick={() => setShowEditModal(false)}
                 className="bg-red-500 text-white px-4 py-2 rounded"
               >
-                Cancel
+                Hủy
               </button>
               <button
                 onClick={handleSaveEdit}
                 className="bg-blue-500 text-white px-4 py-2 rounded"
               >
-                Save
+                Lưu
               </button>
             </div>
           </div>
         </div>
       )}
     </div>
+
   );
 };
 

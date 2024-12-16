@@ -46,7 +46,7 @@ export default function HomePage() {
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch('/api/fetchUserId?id=647e915f3dbfbb6c487d9abc');
+      const response = await fetch('/api/fetchUserId?id=6750aaec16fdbf5501ddc06a  ');
       const currentUser = await response.json();
       setCurrentUser(currentUser);
     } catch (error) {
@@ -96,11 +96,9 @@ export default function HomePage() {
         displayName: currentUser.displayName,
       },
     };
-
     if (imageURL) {
       newPost.url = imageURL;
     }
-
     try {
       const response = await fetch('/api/createPost', {
         method: 'POST',
@@ -145,7 +143,7 @@ export default function HomePage() {
   }, [showPostModal]);
 
   return (
-    <div className="flex flex-col items-center bg-gray-100 min-h-screen px-2 md:px-4">
+    <div className="w-full flex flex-col items-center bg-gray-100 min-h-screen px-2 md:px-4">
       {/* Header */}
       <header className="flex justify-center items-center my-3 gap-4">
         <h1 className="text-md font-bold">Dành cho bạn</h1>
@@ -185,7 +183,7 @@ export default function HomePage() {
         <div className='mb-10 md:mb-0'>
           {posts.length > 0 ? (
             posts.map((post: PostProps) => (
-              <PostComponent key={post._id} {...post} onPostUpdated={handlePostUpdated} onDelete={handleDeletePost}/>
+              <PostComponent key={post._id} {...post} onPostUpdated={handlePostUpdated} onDelete={handleDeletePost} currentUser={currentUser}/>
             ))
           ) : (
             <p className="text-gray-500 text-center m-4">Không có bài đăng nào để hiển thị.</p>

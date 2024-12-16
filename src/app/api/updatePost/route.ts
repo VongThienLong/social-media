@@ -3,14 +3,12 @@ import { connectToDatabase } from '../../../libs/mongodb';
 export async function PATCH(req: Request) {
   try {
     const { _id, content } = await req.json();
-
     if (!_id || !content) {
       return new Response(
         JSON.stringify({ success: false, message: 'Missing required fields' }),
         { status: 400 }
       );
     }
-
     const { db } = await connectToDatabase();
     const updatedPost = await db.collection('posts').updateOne(
       { _id: _id },

@@ -15,6 +15,7 @@ export async function GET() {
       url: post.url || '',
       tags: post.tags || [],
       visibility: post.visibility || 'public',
+      userId: post.userId || '',
       displayName: post.userInfo?.displayName || '',
       avatar: post.userInfo?.avatar || '',
     }));
